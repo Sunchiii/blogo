@@ -152,8 +152,30 @@ export function PublishModal({
             </div>
           )}
           {status === "error" && (
-            <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3">
-              <p className="text-sm text-destructive">{errorMsg}</p>
+            <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 space-y-2">
+              {errorMsg.includes("Resource not accessible by integration") ? (
+                <>
+                  <p className="text-sm font-medium text-destructive">
+                    GitHub OAuth App blocked by organization
+                  </p>
+                  <p className="text-sm text-destructive/80">
+                    If your repository belongs to a GitHub organization, an admin must
+                    approve this OAuth App before it can write to org repos.
+                  </p>
+                  <ol className="text-sm text-destructive/80 list-decimal list-inside space-y-1">
+                    <li>Go to your org → Settings → Third-party Access → OAuth Apps</li>
+                    <li>Find and approve this app, or ask an org admin to do so</li>
+                    <li>Re-authenticate and try again</li>
+                  </ol>
+                  <p className="text-sm text-destructive/80">
+                    Alternatively, point{" "}
+                    <code className="font-mono text-xs">NEXT_PUBLIC_GITHUB_REPO</code>{" "}
+                    at a personal repository you own.
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-destructive">{errorMsg}</p>
+              )}
             </div>
           )}
         </div>

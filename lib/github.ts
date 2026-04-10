@@ -10,7 +10,10 @@ async function getFileSHA(path: string, token: string): Promise<string | null> {
     },
   });
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`GitHub API error ${res.status}: ${JSON.stringify(err)}`);
+  }
   const data = await res.json();
   return data.sha as string;
 }
