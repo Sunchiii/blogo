@@ -1,0 +1,8 @@
+{
+  "title": "Hello, World!",
+  "slug": "hello-world",
+  "description": "Welcome to Blogo — a local-first, GitHub-powered dev blog built with Next.js, Editor.js, and the GitHub Contents API.",
+  "tags": ["meta", "nextjs", "blogging"],
+  "publishedAt": "2026-04-09T10:00:00Z",
+  "updatedAt": "2026-04-09T10:00:00Z"
+}
