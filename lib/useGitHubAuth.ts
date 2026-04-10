@@ -24,7 +24,7 @@ export function useGitHubAuth() {
     }
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
-      scope: "public_repo",
+      scope: "repo",
       redirect_uri: `${window.location.origin}/editor/auth/callback`,
     });
     window.location.href = `https://github.com/login/oauth/authorize?${params}`;

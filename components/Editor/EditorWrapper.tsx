@@ -25,11 +25,14 @@ export default function EditorWrapper({
   useEffect(() => {
     if (!holderRef.current) return;
 
+    let destroyed = false;
     let editor: { destroy?: () => void } | null = null;
 
     const init = async () => {
       const EditorJS = (await import("@editorjs/editorjs")).default;
       const { EDITOR_TOOLS } = await import("./tools");
+
+      if (destroyed) return;
 
       editor = new EditorJS({
         holder: holderRef.current!,
@@ -49,6 +52,7 @@ export default function EditorWrapper({
     init();
 
     return () => {
+      destroyed = true;
       editor?.destroy?.();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
