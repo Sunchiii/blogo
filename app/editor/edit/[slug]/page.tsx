@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useEffect, useCallback, use } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,8 +19,8 @@ const EditorWrapper = dynamic(() => import("@/components/Editor/EditorWrapper"),
   ),
 });
 
-export default function EditPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export default function EditPostPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const [draft, setDraft] = useState<Draft | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
