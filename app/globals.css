@@ -62,3 +62,38 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .animate-shadow-pulse {
+    animation: shadow-pulse 4s ease-in-out infinite;
+  }
+
+  .animate-particle-1 {
+    animation: particle-move 8s linear infinite;
+  }
+
+  .animate-particle-2 {
+    animation: particle-move 12s linear infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  @keyframes shadow-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.1; }
+    50% { transform: translateX(-50%) scale(0.8); opacity: 0.05; }
+  }
+
+  @keyframes particle-move {
+    0% { transform: translate(0, 0); opacity: 0; }
+    20% { opacity: 0.5; }
+    80% { opacity: 0.5; }
+    100% { transform: translate(-100px, -50px); opacity: 0; }
+  }
+}
