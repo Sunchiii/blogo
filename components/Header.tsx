@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { EditorAuthStatus } from "@/components/Editor/EditorAuthStatus";
 
 export function Header() {
   return (
@@ -30,13 +31,10 @@ export function Header() {
           >
             About
           </Link>
-          <Link
-            href="/editor"
-            className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Editor
-          </Link>
-          <ThemeToggle />
+          <div className="flex items-center gap-2 ml-2">
+            <EditorAuthStatus />
+            <ThemeToggle />
+          </div>
         </nav>
       </div>
     </header>

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { EditorAuthStatus } from "@/components/Editor/EditorAuthStatus";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { AuthGuard } from "@/components/Editor/AuthGuard";
 
 export default function EditorLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -28,7 +29,9 @@ export default function EditorLayout({ children }: { children: React.ReactNode }
         </div>
       </header>
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8">
-        {children}
+        <AuthGuard>
+          {children}
+        </AuthGuard>
       </main>
       <PWAInstallPrompt />
     </div>

@@ -45,6 +45,20 @@ export function PublishModal({
     try {
       setStatus("converting");
 
+      // Check permission one last time before pushing
+      const { checkUserPermission, isUserWhitelisted } = await import("@/lib/github");
+      
+      // Check whitelist
+      const username = sessionStorage.getItem("github_username");
+      if (username && !isUserWhitelisted(username)) {
+        throw new Error("You are not on the allowed contributors list.");
+      }
+
+      const permission = await checkUserPermission(token);
+      if (permission !== "admin" && permission !== "write") {
+        throw new Error("You do not have write permissions for this repository.");
+      }
+
       // Dynamically import to avoid SSR issues
       const edjsHTML = (await import("editorjs-html")).default;
       const parser = edjsHTML();
