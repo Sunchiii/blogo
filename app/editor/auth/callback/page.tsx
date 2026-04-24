@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGitHubAuth } from "@/lib/useGitHubAuth";
 import { Suspense } from "react";
+import { toast } from "sonner";
 
 function CallbackHandler() {
+  console.log("CallbackHandler rendering...");
   const searchParams = useSearchParams();
   const router = useRouter();
   const { saveToken } = useGitHubAuth();
@@ -13,22 +15,39 @@ function CallbackHandler() {
 
   useEffect(() => {
     const code = searchParams.get("code");
+    console.log("Auth Callback: Received code:", code ? "YES" : "NO");
+
     if (!code) {
-      setError("No authorization code received.");
+      setError("No authorization code received from GitHub.");
       return;
     }
 
+    toast.loading("Verifying with GitHub...", {
+      id: "auth-callback",
+    });
+
     fetch(`/api/auth/github/callback?code=${code}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) {
-          setError(data.error);
-          return;
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          throw new Error(data.error_description || data.error || "Authentication failed");
         }
+        return data;
+      })
+      .then((data) => {
         saveToken(data.access_token, data.username);
+        toast.success(`Welcome back, ${data.username}!`, {
+          description: "You have successfully logged in with GitHub.",
+        });
         router.replace("/editor");
       })
-      .catch(() => setError("Authentication failed. Please try again."));
+      .catch((err) => {
+        const message = err instanceof Error ? err.message : "Authentication failed";
+        setError(message);
+        toast.error("Login Failed", {
+          description: message,
+        });
+      });
   }, [searchParams, router, saveToken]);
 
   if (error) {

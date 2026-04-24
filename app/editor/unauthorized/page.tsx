@@ -1,14 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useGitHubAuth } from "@/lib/useGitHubAuth";
 
 export default function UnauthorizedPage() {
+  const { username } = useGitHubAuth();
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="max-w-md w-full p-8 text-center border border-border rounded-lg bg-card">
         <h1 className="text-2xl font-bold mb-4 text-primary">Access Denied</h1>
-        <p className="mb-6 text-muted-foreground">
-          It looks like you're logged in with GitHub, but you haven't been
-          verified as a contributor yet.
+        <p className="mb-2 text-muted-foreground">
+          It looks like you're logged in as <span className="font-bold text-foreground">@{username || "unknown"}</span>, 
+          but you haven't been verified as a contributor yet.
+        </p>
+        <p className="mb-6 text-sm text-muted-foreground italic">
+          (If this is not your intended account, please sign out and try again)
         </p>
         
         <div className="space-y-4 mb-8 text-left bg-muted/50 p-4 rounded-lg">

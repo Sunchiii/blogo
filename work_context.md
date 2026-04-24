@@ -36,6 +36,83 @@
 > All work entries go here, newest at the top.
 
 ---
+### [2026-04-24 10:50] — Fixed AuthGuard Blocking Callback
+
+**What we did:**
+Modified `components/Editor/AuthGuard.tsx` to explicitly allow the `/editor/auth/callback` path. Previously, the guard was intercepting the request before the callback handler could run, resulting in a silent failure where no code (or logs) ever executed.
+
+**What was decided or found:**
+Found that the "is authenticated" check in the `AuthGuard` was too aggressive and prevented the very component responsible for authenticating from rendering.
+
+**Current status:** DONE ✅
+
+**What to do next:**
+The user should try logging in again. This time, the `CallbackHandler` should render, and logs/toasts should appear in the browser.
+
+---
+**What we did:**
+Added granular logging to `CallbackHandler` and `useGitHubAuth.saveToken` to track the state transition after returning from GitHub.
+
+**What was decided or found:**
+Confirmed browser successfully redirects to GitHub and back, but the application fails to reflect the logged-in state.
+
+**Current status:** IN PROGRESS 🔄
+
+**What to do next:**
+Analyze browser console logs to see if `saveToken` is called and if `AuthGuard` is causing a race condition.
+
+---
+**What we did:**
+Added `toast.loading` and console logs to the `AuthCallbackPage` to track the "return trip" from GitHub. Added a log for the final redirect URL in `lib/useGitHubAuth.ts`.
+
+**What was decided or found:**
+Suspected the process might be failing silently after returning from GitHub or the redirect to GitHub is being blocked.
+
+**Current status:** IN PROGRESS 🔄
+
+**What to do next:**
+Wait for user feedback on whether the browser actually redirects and if the callback page is reached.
+
+---
+**What we did:**
+Modified `lib/useGitHubAuth.ts` to include `sonner` toasts within the `login` function. This provides immediate feedback if the environment variables are not correctly loaded on the client side.
+
+**What was decided or found:**
+Suspected that `NEXT_PUBLIC_GITHUB_CLIENT_ID` might be undefined on the client, causing the `login` function to return early without any visual feedback.
+
+**Current status:** IN PROGRESS 🔄
+
+**What to do next:**
+The user should try clicking the login button again. If the "Configuration Error" toast appears, it means the environment variables need to be correctly exposed to the client (likely requiring a server restart).
+
+---
+**What we did:**
+Updated `app/editor/auth/callback/page.tsx` to use `sonner` toasts for user feedback. Enhanced the fetch logic to properly catch and display specific error descriptions from the API response instead of generic failure messages.
+
+**What was decided or found:**
+Decided to use the existing `sonner` library (found in `package.json` and already configured in `RootLayout`) for consistent UI notifications.
+
+**Current status:** DONE ✅
+
+**What to do next:**
+The user should try logging in again to see the specific error message in the toast, which will help diagnose any remaining issues.
+
+---
+**What we did:**
+1. Added mandatory `User-Agent` headers to all GitHub API calls in `app/api/auth/github/callback/route.ts` and `lib/github.ts`.
+2. Improved error handling and server-side logging in the GitHub OAuth callback route.
+3. Updated `components/Editor/AuthGuard.tsx` to include a login button when unauthenticated and implemented the missing redirect to `/editor/unauthorized` for users without repository write permissions.
+4. Verified environment variable names match between `.env.local` and the codebase.
+
+**What was decided or found:**
+Found that the GitHub API was likely failing due to missing `User-Agent` headers and that the `AuthGuard` was not properly enforcing authorization or providing a way to log in when triggered.
+
+**Current status:** DONE ✅
+
+**What to do next:**
+Verify the fix by attempting a login. If it fails, check the server logs for `[Auth]` prefixed messages to identify the specific failure point.
+
+---
 ### [2026-04-22 14:50] — Implemented Contributor Verification System
 
 **What we did:**

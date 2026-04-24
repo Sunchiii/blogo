@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const TOKEN_KEY = "github_token";
 const USERNAME_KEY = "github_username";
@@ -18,16 +19,30 @@ export function useGitHubAuth() {
   }, []);
 
   function login() {
+    console.log("Login triggered, CLIENT_ID:", CLIENT_ID);
     if (!CLIENT_ID) {
-      console.error("NEXT_PUBLIC_GITHUB_CLIENT_ID is not set");
+      const msg = "NEXT_PUBLIC_GITHUB_CLIENT_ID is not set in environment variables.";
+      console.error(msg);
+      toast.error("Configuration Error", {
+        description: msg,
+      });
       return;
     }
+    
+    toast.info("Redirecting to GitHub...", {
+      description: "Please wait while we connect to your account.",
+    });
+
+    const redirectUri = `${window.location.origin}/editor/auth/callback`;
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
       scope: "repo",
-      redirect_uri: `${window.location.origin}/editor/auth/callback`,
+      redirect_uri: redirectUri,
     });
-    window.location.href = `https://github.com/login/oauth/authorize?${params}`;
+    
+    const url = `https://github.com/login/oauth/authorize?${params}`;
+    console.log("Redirecting to GitHub:", url);
+    window.location.href = url;
   }
 
   function logout() {
@@ -38,6 +53,7 @@ export function useGitHubAuth() {
   }
 
   function saveToken(newToken: string, newUsername: string) {
+    console.log("Saving token and username to sessionStorage:", newUsername);
     sessionStorage.setItem(TOKEN_KEY, newToken);
     sessionStorage.setItem(USERNAME_KEY, newUsername);
     setToken(newToken);

@@ -7,6 +7,7 @@ async function getFileSHA(path: string, token: string): Promise<string | null> {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
+      "User-Agent": "Blogo-App",
     },
   });
   if (res.status === 404) return null;
@@ -41,6 +42,7 @@ export async function publishFile(
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
       Accept: "application/vnd.github+json",
+      "User-Agent": "Blogo-App",
     },
     body: JSON.stringify(body),
   });
@@ -65,6 +67,7 @@ export async function deleteFile(
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
       Accept: "application/vnd.github+json",
+      "User-Agent": "Blogo-App",
     },
     body: JSON.stringify({ message, sha, branch: BRANCH }),
   });
@@ -78,6 +81,7 @@ export async function checkUserPermission(token: string): Promise<string> {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
+      "User-Agent": "Blogo-App",
     },
   });
   
@@ -90,6 +94,7 @@ export async function checkUserPermission(token: string): Promise<string> {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
+      "User-Agent": "Blogo-App",
     },
   });
 
