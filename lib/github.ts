@@ -2,7 +2,26 @@ const GITHUB_API = "https://api.github.com";
 const REPO = process.env.NEXT_PUBLIC_GITHUB_REPO!;
 const BRANCH = process.env.NEXT_PUBLIC_GITHUB_BRANCH || "main";
 
+function assertGitHubConfig() {
+  if (!REPO) {
+    throw new Error("NEXT_PUBLIC_GITHUB_REPO is not configured. Use the format owner/repo.");
+  }
+
+  if (REPO.includes("github.com") || REPO.startsWith("http") || REPO.split("/").length !== 2) {
+    throw new Error(
+      `NEXT_PUBLIC_GITHUB_REPO must use owner/repo format, not "${REPO}". Example: octocat/blogo.`
+    );
+  }
+}
+
+async function parseGitHubError(res: Response) {
+  const err = await res.json().catch(() => ({}));
+  const message = typeof err.message === "string" ? err.message : res.statusText;
+  return `${message} for repo "${REPO}", branch "${BRANCH}". Check that NEXT_PUBLIC_GITHUB_REPO is owner/repo and your GitHub account has write access.`;
+}
+
 async function getFileSHA(path: string, token: string): Promise<string | null> {
+  assertGitHubConfig();
   const res = await fetch(`${GITHUB_API}/repos/${REPO}/contents/${path}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -11,8 +30,7 @@ async function getFileSHA(path: string, token: string): Promise<string | null> {
   });
   if (res.status === 404) return null;
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`GitHub API error ${res.status}: ${JSON.stringify(err)}`);
+    throw new Error(`GitHub API error ${res.status}: ${await parseGitHubError(res)}`);
   }
   const data = await res.json();
   return data.sha as string;
@@ -24,6 +42,7 @@ export async function publishFile(
   message: string,
   token: string
 ): Promise<void> {
+  assertGitHubConfig();
   const sha = await getFileSHA(path, token);
   // btoa with unescape(encodeURIComponent()) handles Unicode characters
   const encoded = btoa(unescape(encodeURIComponent(content)));
@@ -46,8 +65,9 @@ export async function publishFile(
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(`GitHub API error ${res.status}: ${JSON.stringify(err)}`);
+    throw new Error(
+      `GitHub API error ${res.status} while publishing "${path}": ${await parseGitHubError(res)}`
+    );
   }
 }
 
@@ -56,6 +76,7 @@ export async function deleteFile(
   message: string,
   token: string
 ): Promise<void> {
+  assertGitHubConfig();
   const sha = await getFileSHA(path, token);
   if (!sha) return; // File doesn't exist
 
@@ -69,5 +90,9 @@ export async function deleteFile(
     body: JSON.stringify({ message, sha, branch: BRANCH }),
   });
 
-  if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
+  if (!res.ok) {
+    throw new Error(
+      `GitHub API error ${res.status} while deleting "${path}": ${await parseGitHubError(res)}`
+    );
+  }
 }

@@ -77,6 +77,12 @@ export function PublishModal({
         token
       );
 
+      await fetch("/api/editor/local-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ meta, html }),
+      });
+
       // Update local draft status
       await db.drafts.update(draft.id, { status: "published", updatedAt: new Date() });
 

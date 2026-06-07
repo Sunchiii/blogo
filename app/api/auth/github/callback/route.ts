@@ -23,11 +23,21 @@ export async function GET(request: NextRequest) {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, code }),
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      code,
+      redirect_uri: `${request.nextUrl.origin}/editor/auth/callback`,
+    }),
+    cache: "no-store",
   });
 
   if (!tokenRes.ok) {
-    return NextResponse.json({ error: "Token exchange failed" }, { status: 500 });
+    const message = await tokenRes.text().catch(() => "");
+    return NextResponse.json(
+      { error: `GitHub token exchange failed (${tokenRes.status}). ${message}` },
+      { status: 500 }
+    );
   }
 
   const tokenData = await tokenRes.json();
@@ -36,14 +46,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: tokenData.error_description }, { status: 400 });
   }
 
+  if (!tokenData.access_token) {
+    return NextResponse.json(
+      { error: "GitHub did not return an access token." },
+      { status: 502 }
+    );
+  }
+
   // Fetch GitHub username using the access token
   const userRes = await fetch("https://api.github.com/user", {
     headers: {
       Authorization: `Bearer ${tokenData.access_token}`,
       Accept: "application/vnd.github+json",
     },
+    cache: "no-store",
   });
-  const userData = userRes.ok ? await userRes.json() : {};
+  if (!userRes.ok) {
+    const message = await userRes.text().catch(() => "");
+    return NextResponse.json(
+      { error: `GitHub user lookup failed (${userRes.status}). ${message}` },
+      { status: 500 }
+    );
+  }
+  const userData = await userRes.json();
 
   return NextResponse.json({
     access_token: tokenData.access_token,
